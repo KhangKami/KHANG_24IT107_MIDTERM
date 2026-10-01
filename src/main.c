@@ -47,7 +47,7 @@ static int process_operands(int count, char *names[],
 
     /* Non-directory operands first. */
     if (files.count > 0) {
-        print_entries(&files, opts);
+        print_entries(&files, opts, 0);
         printed_something = 1;
     }
 
@@ -66,7 +66,7 @@ static int process_operands(int count, char *names[],
         else
         {
             sort_entries(&contents, opts);
-            print_entries(&contents, opts);
+            print_entries(&contents, opts, 1);
         }
         list_free(&contents);
         printed_something = 1;

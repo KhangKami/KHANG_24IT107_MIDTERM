@@ -4,7 +4,11 @@
 #include "entry.h"
 #include "options.h"
 
-/* Print every entry of the list, one per line. */
-void print_entries(const struct entry_list *list, const struct options *opts);
+/*
+ * Print every entry of the list (short or long format).
+ * show_total: print the "total N" line (used for directory contents).
+ */
+void print_entries(const struct entry_list *list, const struct options *opts,
+                   int show_total);
 
 #endif
