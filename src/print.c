@@ -10,6 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "format.h"
 #include "print.h"
 #include "utils.h"
 
@@ -24,94 +25,6 @@ struct row {
     char size[64];
     char date[64];
 };
-
-/* Format a byte count as 1.5K, 23M ... (used by -h). */
-static void fmt_human(char *buf, size_t n, unsigned long long bytes)
-{
-    static const char units[] = "BKMGTP";
-    double v = (double)bytes;
-    int i = 0;
-
-    while (v >= 1024.0 && i < 5) {
-        v /= 1024.0;
-        i++;
-    }
-    if (i == 0)
-        snprintf(buf, n, "%lluB", bytes);
-    else if (v < 10.0)
-        snprintf(buf, n, "%.1f%c", v, units[i]);
-    else
-        snprintf(buf, n, "%.0f%c", v, units[i]);
-}
-
-/* Format a block count (st_blocks is in 512-byte units) per -k / -h. */
-static void fmt_blocks(char *buf, size_t n, unsigned long long blocks,
-                       const struct options *opts)
-{
-    if (opts->size_mode == SIZE_HUMAN)
-        fmt_human(buf, n, blocks * 512ULL);
-    else if (opts->size_mode == SIZE_KILO)
-        snprintf(buf, n, "%llu", (blocks + 1) / 2);   /* round up */
-    else
-        snprintf(buf, n, "%llu", blocks);
-}
-
-/* Build the 10-character mode string such as "drwxr-xr-t". */
-static void fmt_mode(char *out, mode_t m)
-{
-    char type = '-';
-
-    if (S_ISDIR(m)) type = 'd';
-    else if (S_ISLNK(m)) type = 'l';
-    else if (S_ISBLK(m)) type = 'b';
-    else if (S_ISCHR(m)) type = 'c';
-    else if (S_ISSOCK(m)) type = 's';
-    else if (S_ISFIFO(m)) type = 'p';
-#ifdef S_ISWHT
-    else if (S_ISWHT(m)) type = 'w';
-#endif
-
-    out[0] = type;
-    out[1] = (m & S_IRUSR) ? 'r' : '-';
-    out[2] = (m & S_IWUSR) ? 'w' : '-';
-    if (m & S_ISUID)
-        out[3] = (m & S_IXUSR) ? 's' : 'S';
-    else
-        out[3] = (m & S_IXUSR) ? 'x' : '-';
-    out[4] = (m & S_IRGRP) ? 'r' : '-';
-    out[5] = (m & S_IWGRP) ? 'w' : '-';
-    if (m & S_ISGID)
-        out[6] = (m & S_IXGRP) ? 's' : 'S';
-    else
-        out[6] = (m & S_IXGRP) ? 'x' : '-';
-    out[7] = (m & S_IROTH) ? 'r' : '-';
-    out[8] = (m & S_IWOTH) ? 'w' : '-';
-    if (m & S_ISVTX)
-        out[9] = (m & S_IXOTH) ? 't' : 'T';
-    else
-        out[9] = (m & S_IXOTH) ? 'x' : '-';
-    out[10] = '\0';
-}
-
-/* Return the -F indicator character for a file, or 0 if none. */
-static char classify_char(const struct stat *st)
-{
-    if (S_ISDIR(st->st_mode))
-        return '/';
-    if (S_ISLNK(st->st_mode))
-        return '@';
-    if (S_ISSOCK(st->st_mode))
-        return '=';
-    if (S_ISFIFO(st->st_mode))
-        return '|';
-#ifdef S_ISWHT
-    if (S_ISWHT(st->st_mode))
-        return '%';
-#endif
-    if (st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
-        return '*';
-    return 0;
-}
 
 /* Fill every column of one row from an entry. */
 static void fill_row(struct row *r, const struct file_entry *e,
