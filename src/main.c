@@ -1,22 +1,28 @@
 #include <stdio.h>
 
+#include "entry.h"
+#include "list.h"
 #include "options.h"
 
 int main(int argc, char *argv[])
 {
     struct options opts;
-    int first;
-    int i;
+    struct entry_list list;
+    const char *dir;
+    size_t i;
 
-    first = parse_options(argc, argv, &opts);
+    int first = parse_options(argc, argv, &opts);
 
-    /* Temporary debug output: will be removed in later steps. */
-    printf("all=%d almost_all=%d long=%d numeric=%d recursive=%d reverse=%d\n",
-           opts.all, opts.almost_all, opts.long_format,
-           opts.numeric_ids, opts.recursive, opts.reverse);
-    printf("time_kind=%d nonprint=%d size_mode=%d\n",
-           opts.time_kind, opts.nonprint, opts.size_mode);
-    for (i = first; i < argc; i++)
-        printf("operand: %s\n", argv[i]);
+    dir = (first < argc) ? argv[first] : ".";
+
+    list_init(&list);
+    if (list_dir(dir, &opts, &list) == -1)
+        return 1;
+
+    /* Temporary: print names unsorted. Real printing comes in step 4. */
+    for (i = 0; i < list.count; i++)
+        printf("%s\n", list.items[i].name);
+
+    list_free(&list);
     return 0;
 }
