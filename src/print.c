@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <grp.h>
 #include <limits.h>
 #include <pwd.h>
@@ -177,6 +178,28 @@ static void widen(int *w, const char *s)
         *w = len;
 }
 
+/* Print a file name, replacing non-printable characters with '?' when
+ * -q is active (or by default on a terminal). */
+static void print_name(const char *name, const struct options *opts)
+{
+    int force_q;
+    const unsigned char *p;
+
+    if (opts->nonprint == NP_QUESTION)
+        force_q = 1;
+    else if (opts->nonprint == NP_RAW)
+        force_q = 0;
+    else
+        force_q = isatty(STDOUT_FILENO);
+
+    for (p = (const unsigned char *)name; *p; p++) {
+        if (force_q && !isprint(*p))
+            putchar('?');
+        else
+            putchar(*p);
+    }
+}
+
 void print_entries(const struct entry_list *list, const struct options *opts,
                    int show_total)
 {
@@ -227,7 +250,7 @@ void print_entries(const struct entry_list *list, const struct options *opts,
                    w_owner, r->owner, w_group, r->group, w_size, r->size,
                    r->date);
 
-        printf("%s", e->name);
+        print_name(e->name, opts);
         if (opts->classify && (c = classify_char(&e->st)) != 0)
             putchar(c);
 
