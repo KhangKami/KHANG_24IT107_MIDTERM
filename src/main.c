@@ -6,6 +6,7 @@
 #include "list.h"
 #include "options.h"
 #include "print.h"
+#include "sort.h"
 #include "utils.h"
 
 /*
@@ -41,6 +42,9 @@ static int process_operands(int count, char *names[],
         list_add(target, names[i], names[i]);
     }
 
+    sort_entries(&files, opts);
+    sort_entries(&dirs, opts);
+
     /* Non-directory operands first. */
     if (files.count > 0) {
         print_entries(&files, opts);
@@ -60,7 +64,10 @@ static int process_operands(int count, char *names[],
         if (list_dir(name, opts, &contents) == -1)
             status = 1;
         else
+        {
+            sort_entries(&contents, opts);
             print_entries(&contents, opts);
+        }
         list_free(&contents);
         printed_something = 1;
     }
