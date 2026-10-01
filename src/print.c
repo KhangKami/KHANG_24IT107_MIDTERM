@@ -124,6 +124,9 @@ void print_entries(const struct entry_list *list, const struct options *opts,
     size_t i;
     char c;
 
+    if (list->count == 0)
+        return;
+
     /* "total" line: always for -l, for -s only on a terminal. */
     if (show_total && (opts->long_format ||
                        (opts->show_blocks && isatty(STDOUT_FILENO)))) {
@@ -133,8 +136,6 @@ void print_entries(const struct entry_list *list, const struct options *opts,
         printf("total %s\n", buf);
     }
 
-    if (list->count == 0)
-        return;
 
     rows = xmalloc(list->count * sizeof(*rows));
 

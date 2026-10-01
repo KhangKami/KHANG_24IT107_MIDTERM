@@ -90,7 +90,7 @@ int ls_run(int count, char *names[], const struct options *opts)
         if (printed_something)
             printf("\n");
         if (show_dir(dirs.items[k].name, opts,
-                     count > 1 || opts->recursive) != 0)
+                     count > 1) != 0)
             status = 1;
         printed_something = 1;
     }

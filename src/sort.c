@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "sort.h"
 
@@ -7,13 +8,15 @@
  * options in a file-scope pointer while sorting. */
 static const struct options *cur_opts;
 
-/* Pick the timestamp selected by -c / -u (default: modification time). */
-static time_t entry_time(const struct file_entry *e)
+/* Pick the timestamp selected by -c / -u (default: modification time),
+ * including the nanosecond part so files created in the same second
+ * still sort correctly. */
+static struct timespec entry_time(const struct file_entry *e)
 {
     switch (cur_opts->time_kind) {
-    case TIME_CTIME: return e->st.st_ctime;
-    case TIME_ATIME: return e->st.st_atime;
-    default:         return e->st.st_mtime;
+    case TIME_CTIME: return e->st.st_ctim;
+    case TIME_ATIME: return e->st.st_atim;
+    default:         return e->st.st_mtim;
     }
 }
 
@@ -35,12 +38,14 @@ static int compare(const void *pa, const void *pb)
         if (a->st.st_size != b->st.st_size)
             result = (a->st.st_size < b->st.st_size) ? 1 : -1;
     } else if (cur_opts->sort_time) {
-        /* newest first */
-        time_t ta = entry_time(a);
-        time_t tb = entry_time(b);
+        /* newest first: compare seconds, then nanoseconds */
+        struct timespec ta = entry_time(a);
+        struct timespec tb = entry_time(b);
 
-        if (ta != tb)
-            result = (ta < tb) ? 1 : -1;
+        if (ta.tv_sec != tb.tv_sec)
+            result = (ta.tv_sec < tb.tv_sec) ? 1 : -1;
+        else if (ta.tv_nsec != tb.tv_nsec)
+            result = (ta.tv_nsec < tb.tv_nsec) ? 1 : -1;
     }
     if (result == 0)
         result = cmp_name(a, b);
