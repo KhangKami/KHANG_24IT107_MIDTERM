@@ -14,15 +14,28 @@
 
     make            # biên dịch, tạo file thực thi ./myls
     make clean      # xóa các file .o và file thực thi
-    ./myls [-AacdFfhiklnqRrSstuw] [file ...]
+Cú pháp:
+
+    ./myls [tùy chọn] [file hoặc thư mục ...]
+
+Trong đó:
+
+- `./myls`: tên chương trình, chạy từ thư mục project.
+- `[tùy chọn]`: không bắt buộc. Gồm một hoặc nhiều chữ cái trong `AacdFfhiklnqRrSstuw`.
+- `[file hoặc thư mục ...]`: không bắt buộc, có thể ghi nhiều tên. Nếu
+  không ghi gì thì liệt kê thư mục hiện tại.
 
 Ví dụ:
 
     ./myls                  # liệt kê thư mục hiện tại
-    ./myls -la /etc         # dạng chi tiết, có cả file ẩn
+    ./myls -la /etc         # dạng chi tiết, có cả file ẩn, thư mục /etc
     ./myls -lhS src         # kích thước dễ đọc, xếp theo kích thước
     ./myls -R .             # liệt kê đệ quy
     ./myls -d src include   # chỉ in tên thư mục, không đi vào trong
+    ./myls -l a.txt src     # nhiều đối số: file in trước, thư mục sau
+
+Nếu dùng tùy chọn không hợp lệ, chương trình in thông báo lỗi kèm dòng
+`usage` rồi thoát với mã 1.
 
 ## 3. Các tùy chọn đã cài đặt
 
