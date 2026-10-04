@@ -9,8 +9,6 @@
 ## 1. Giới thiệu
 
 Đây là phiên bản đơn giản của lệnh `ls(1)` trong UNIX, viết bằng ngôn ngữ C
-từ đầu, bám theo trang man của NetBSD mà đề bài cung cấp. Chương trình chỉ
-hỗ trợ tập con các tùy chọn nằm trong trang man đó.
 
 ## 2. Cách biên dịch và chạy
 
